@@ -14,7 +14,7 @@ This is Automata, a Golang implementation of Conway's Game of Life with a twist!
 2. Clone the Repository:
 
 ```shell
-git clone https://github.com/KalebHawkins/automata
+git clone https://github.com/KalebHawkins/automata.git
 ```
 
 3. Build the Program:
