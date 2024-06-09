@@ -26,17 +26,16 @@ const (
 	AliveSymbol rune = '@'
 	// DeadSymbol is the rune used to display cells in an Dead State
 	DeadSymbol rune = '.'
-	// FPS is how many frames per second
-	FPS = 60
 )
 
 // keyMap defines a set of keybindings for the help menu.
 // To work for help it must satisfy the key.Map interface.
 type keyMap struct {
-	Start key.Binding
-	Help  key.Binding
-	Next  key.Binding
-	Quit  key.Binding
+	Start         key.Binding
+	Help          key.Binding
+	Next          key.Binding
+	PlaybackSpeed key.Binding
+	Quit          key.Binding
 }
 
 // ShortHelp returns keybindings to be shown in the mini help view.
@@ -47,7 +46,7 @@ func (k keyMap) ShortHelp() []key.Binding {
 // FullHelp returns keybindings for the expanded help view.
 func (k keyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
-		{k.Start, k.Next},
+		{k.Start, k.Next, k.PlaybackSpeed},
 		{k.Help, k.Quit},
 	}
 
@@ -61,6 +60,10 @@ var keys = keyMap{
 	Next: key.NewBinding(
 		key.WithKeys("n"),
 		key.WithHelp("n", "next generation"),
+	),
+	PlaybackSpeed: key.NewBinding(
+		key.WithKeys("left", "right"),
+		key.WithHelp("←/→", "adjust playback speed"),
 	),
 	Help: key.NewBinding(
 		key.WithKeys("?"),
@@ -80,6 +83,7 @@ type Model struct {
 	isPaused   bool
 	generation int
 	mouseLoc   [2]int
+	fps        int
 	keys       keyMap
 	help       help.Model
 }
@@ -130,7 +134,8 @@ func (m Model) View() string {
 		s.WriteRune('\n')
 	}
 
-	s.WriteString(fmt.Sprintf("\nMouse: (%d, %d)\n", m.mouseLoc[0], m.mouseLoc[1]))
+	s.WriteString(fmt.Sprintf("\nMouse Location: (%d, %d)\n", m.mouseLoc[0], m.mouseLoc[1]))
+	s.WriteString(fmt.Sprintf("Framerate: %d/fps", m.fps))
 	s.WriteString(fmt.Sprintf("\n\nGeneration: %d\n\n", m.generation))
 	s.WriteString(m.help.View(m.keys))
 	return s.String()
@@ -145,6 +150,7 @@ func NewModel() Model {
 		isPaused: true,
 		keys:     keys,
 		help:     help.New(),
+		fps:      60,
 	}
 }
 
@@ -157,6 +163,8 @@ func (m Model) handleKeyEvents(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case key.Matches(msg, m.keys.Next):
 		m.updateCells()
 		m.generation++
+	case key.Matches(msg, m.keys.PlaybackSpeed):
+		m.handlePlaybackSpeed(msg)
 	case key.Matches(msg, m.keys.Help):
 		m.help.ShowAll = !m.help.ShowAll
 	case key.Matches(msg, m.keys.Quit):
@@ -194,6 +202,16 @@ func (m Model) handleGridSizing(msg tea.WindowSizeMsg) (tea.Model, tea.Cmd) {
 	m.help.Width = msg.Width
 
 	return m, nil
+}
+
+// handlePlaybackSpeed controls the playback speed of the generation animation.
+func (m *Model) handlePlaybackSpeed(msg tea.KeyMsg) {
+	if msg.Type == tea.KeyLeft && m.fps > 1 {
+		m.fps--
+	}
+	if msg.Type == tea.KeyRight {
+		m.fps++
+	}
 }
 
 // countNeighbors counts the number of neighbors of a corresponding cell.
@@ -263,7 +281,7 @@ func (m Model) getNextState(currentState, neighborCount int) int {
 
 // Tick plays the animation at the constant framerate of 60 FPS.
 func (m Model) Tick() tea.Cmd {
-	return tea.Tick(time.Second/FPS, func(t time.Time) tea.Msg {
+	return tea.Tick(time.Second/time.Duration(m.fps), func(t time.Time) tea.Msg {
 		return updateMsg{}
 	})
 }
