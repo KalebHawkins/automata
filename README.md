@@ -1,6 +1,6 @@
 # Automata: A Conway's Game of Life Variant
 
-This is Automata, a Golang implementation of Conway's Game of Life with a twist! This program simulates the evolution of cellular automata, where the next state of a cell depends on its current state and the states of its neighbors.
+This is Automata, a Golang implementation of Conway's Game of Life. This program simulates the evolution of cellular automata, where the next state of a cell depends on its current state and the states of its neighbors.
 
 ## Features:
 
