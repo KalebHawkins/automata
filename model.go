@@ -131,8 +131,8 @@ func (m Model) View() string {
 	}
 
 	s.WriteString(fmt.Sprintf("\nMouse: (%d, %d)\n", m.mouseLoc[0], m.mouseLoc[1]))
-	s.WriteString(fmt.Sprintf("\n\nGeneration: %d\n", m.generation))
-	s.WriteString("This is working... Kinda?")
+	s.WriteString(fmt.Sprintf("\n\nGeneration: %d\n\n", m.generation))
+	s.WriteString(m.help.View(m.keys))
 	return s.String()
 }
 
@@ -151,17 +151,16 @@ func NewModel() Model {
 // handleKeyEvents is a helper function for the models Update method.
 func (m Model) handleKeyEvents(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch {
-	case key.Matches(msg, m.keys.Quit):
-		return m, tea.Quit
-	}
-
-	switch msg.String() {
-	case " ":
+	case key.Matches(msg, m.keys.Start):
 		m.isPaused = !m.isPaused
 		return m, m.Tick()
-	case "n":
+	case key.Matches(msg, m.keys.Next):
 		m.updateCells()
 		m.generation++
+	case key.Matches(msg, m.keys.Help):
+		m.help.ShowAll = !m.help.ShowAll
+	case key.Matches(msg, m.keys.Quit):
+		return m, tea.Quit
 	}
 	return m, nil
 }
