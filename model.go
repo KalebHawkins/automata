@@ -194,6 +194,7 @@ func (m Model) updateCells() {
 	}
 }
 
+// getNextState returns the next state of a cell in the grid.
 func (m Model) getNextState(currentState, neighborCount int) int {
 	switch {
 	case neighborCount < 2 || neighborCount > 3 && currentState == int(Alive):
