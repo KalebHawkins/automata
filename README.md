@@ -49,12 +49,3 @@ Briefly describe any features that allow customization of the simulation (e.g., 
 ## Contributing 
 
 If you'd like to contribute to this project, feel free to submit pull requests!
-
-## TODO
-
-- [ ] BugFix: Cell values get all jumbled when call SetHeight... bug or feature...? IDK.
-- [ ] Enhancement: Glamourize (chrambracelet reference...). Add some lipgloss.
-- [ ] Enhancement: Handle grids with different width and height. Right now I force the grid equal width height.
-- [ ] Enhancement: Add help section to display usage.
-- [ ] Enhancement: Allow setting the FPS to allow for slower animation speed.
-- [ ] Open Issues: for all of the above things.
