@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/KalebHawkins/automata/grid"
+	"github.com/charmbracelet/bubbles/help"
+	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -28,6 +30,48 @@ const (
 	FPS = 60
 )
 
+// keyMap defines a set of keybindings for the help menu.
+// To work for help it must satisfy the key.Map interface.
+type keyMap struct {
+	Start key.Binding
+	Help  key.Binding
+	Next  key.Binding
+	Quit  key.Binding
+}
+
+// ShortHelp returns keybindings to be shown in the mini help view.
+func (k keyMap) ShortHelp() []key.Binding {
+	return []key.Binding{k.Help, k.Quit}
+}
+
+// FullHelp returns keybindings for the expanded help view.
+func (k keyMap) FullHelp() [][]key.Binding {
+	return [][]key.Binding{
+		{k.Start, k.Next},
+		{k.Help, k.Quit},
+	}
+
+}
+
+var keys = keyMap{
+	Start: key.NewBinding(
+		key.WithKeys(" "),
+		key.WithHelp("[Space]", "start/stop animation"),
+	),
+	Next: key.NewBinding(
+		key.WithKeys("n"),
+		key.WithHelp("n", "next generation"),
+	),
+	Help: key.NewBinding(
+		key.WithKeys("?"),
+		key.WithHelp("?", "toggle help menu"),
+	),
+	Quit: key.NewBinding(
+		key.WithKeys("q", "esc", "ctrl+c"),
+		key.WithHelp("q", "quit"),
+	),
+}
+
 type updateMsg struct{}
 
 // Model provides the structure for the simulation world.
@@ -36,6 +80,8 @@ type Model struct {
 	isPaused   bool
 	generation int
 	mouseLoc   [2]int
+	keys       keyMap
+	help       help.Model
 }
 
 // Init performs and model initialization.
@@ -97,13 +143,15 @@ func NewModel() Model {
 	return Model{
 		Grid:     g,
 		isPaused: true,
+		keys:     keys,
+		help:     help.New(),
 	}
 }
 
 // handleKeyEvents is a helper function for the models Update method.
 func (m Model) handleKeyEvents(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	switch msg.Type {
-	case tea.KeyCtrlC:
+	switch {
+	case key.Matches(msg, m.keys.Quit):
 		return m, tea.Quit
 	}
 
@@ -138,8 +186,14 @@ func (m Model) handleMouseEvents(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 // handleGridSizing is a helper function for the models Update method.
 // This handles resizing of the grid when the window size is changed.
 func (m Model) handleGridSizing(msg tea.WindowSizeMsg) (tea.Model, tea.Cmd) {
+
+	// handle grid resizing
 	newHeightWidth := min(msg.Width-msg.Width/4, msg.Height-msg.Height/4)
 	m.Grid.Resize(newHeightWidth, newHeightWidth)
+
+	// handle help resizing
+	m.help.Width = msg.Width
+
 	return m, nil
 }
 

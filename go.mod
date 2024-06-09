@@ -2,7 +2,10 @@ module github.com/KalebHawkins/automata
 
 go 1.22.3
 
-require github.com/charmbracelet/bubbletea v0.26.4
+require (
+	github.com/charmbracelet/bubbles v0.18.0
+	github.com/charmbracelet/bubbletea v0.26.4
+)
 
 require (
 	github.com/charmbracelet/x/ansi v0.1.2 // indirect
